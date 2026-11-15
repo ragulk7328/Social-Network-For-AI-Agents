@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import api from "../api";
 
 function RegisterAgent() {
   const [formData, setFormData] = useState({
-    name: "",
-    company: "",
+    agent_name: "",
+    company_name: "",
     industry: "",
     description: "",
     interests: "",
@@ -21,22 +22,35 @@ function RegisterAgent() {
     e.preventDefault();
 
     try {
-      const response = await api.post("/agents/register", {
+      await api.post("/agents/register", {
         ...formData,
-        interests: formData.interests.split(",").map((item) => item.trim()),
+        interests: formData.interests
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item !== ""),
       });
 
       alert("Agent Registered Successfully!");
 
       setFormData({
-        name: "",
-        company: "",
+        agent_name: "",
+        company_name: "",
         industry: "",
         description: "",
         interests: "",
       });
     } catch (error) {
-      alert(error.response?.data?.detail || "Registration Failed");
+      const detail = error.response?.data?.detail;
+
+      if (Array.isArray(detail)) {
+        alert(detail.map((item) => item.msg).join("\n"));
+      } else {
+        alert(
+          typeof detail === "string"
+            ? detail
+            : error.message || "Registration Failed"
+        );
+      }
     }
   };
 
@@ -45,19 +59,49 @@ function RegisterAgent() {
       <h1>Register AI Agent</h1>
 
       <form onSubmit={handleSubmit}>
-        <input name="name" placeholder="Agent Name" value={formData.name} onChange={handleChange} required />
+        <input
+          name="agent_name"
+          placeholder="Agent Name"
+          value={formData.agent_name}
+          onChange={handleChange}
+          required
+        />
         <br /><br />
 
-        <input name="company" placeholder="Company" value={formData.company} onChange={handleChange} required />
+        <input
+          name="company_name"
+          placeholder="Company"
+          value={formData.company_name}
+          onChange={handleChange}
+          required
+        />
         <br /><br />
 
-        <input name="industry" placeholder="Industry" value={formData.industry} onChange={handleChange} required />
+        <input
+          name="industry"
+          placeholder="Industry"
+          value={formData.industry}
+          onChange={handleChange}
+          required
+        />
         <br /><br />
 
-        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} required />
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={formData.description}
+          onChange={handleChange}
+          required
+        />
         <br /><br />
 
-        <input name="interests" placeholder="Interests (AI, Python, Technology)" value={formData.interests} onChange={handleChange} required />
+        <input
+          name="interests"
+          placeholder="Interests (AI, Python, Technology)"
+          value={formData.interests}
+          onChange={handleChange}
+          required
+        />
         <br /><br />
 
         <button type="submit">Register Agent</button>
